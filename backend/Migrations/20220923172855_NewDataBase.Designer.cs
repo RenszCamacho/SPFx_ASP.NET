@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CrudNet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220923091347_Inicial")]
-    partial class Inicial
+    [Migration("20220923172855_NewDataBase")]
+    partial class NewDataBase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

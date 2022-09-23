@@ -4,7 +4,7 @@
 
 namespace CrudNet.Migrations
 {
-    public partial class Inicial : Migration
+    public partial class NewDataBase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
