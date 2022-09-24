@@ -1,30 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "bootstrap/dist/css/bootstrap.css";
 import * as React from "react";
 import styles from "./CrudNet.module.scss";
-import { ICrudNetProps } from "./ICrudNetProps";
-// import { escape } from '@microsoft/sp-lodash-subset';
-// import Servicios from '../../../services/servicios';
-// import { HttpClient } from "@microsoft/sp-http";
-// import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
-export interface IItem {
-  id: number;
-  nombre: string;
-  correo: string;
-  telefono: number;
+import { ICrudNetProps } from "./ICrudNetProps";
+import { IItem } from "../../../interface/IItem";
+import { ServicesProvider } from "../../../services/servicios";
+
+interface ICrudNetState {
+  data: IItem[];
 }
 
-export default class CrudNet extends React.Component<ICrudNetProps, {}> {
-  private url = "http://localhost:7253/api";
+export default class CrudNet extends React.Component<
+  ICrudNetProps,
+  ICrudNetState
+> {
+  private serviceProvider: ServicesProvider;
+  /**
+   *
+   */
+  constructor(props: ICrudNetProps, state: ICrudNetState) {
+    super(props);
+
+    this.serviceProvider = new ServicesProvider(this.props.wpContext);
+
+    this.state = {
+      data: [],
+    };
+  }
+
+  public async componentDidMount(): Promise<void> {
+    this._getAllItems().then(console.log).catch(console.error);
+  }
 
   public render(): React.ReactElement<ICrudNetProps> {
-    const { description, hasTeamsContext, wpContext } = this.props;
-
-    console.log(wpContext, description);
-
+    console.log(this.state);
     return (
       <section
-        className={`${styles.crudNet} ${hasTeamsContext ? styles.teams : ""}`}
+        className={`${styles.crudNet} ${
+          this.props.hasTeamsContext ? styles.teams : ""
+        }`}
       >
         <h1 className={styles.welcome}>Lista de Contactos</h1>
         <div className="container">
@@ -54,61 +69,57 @@ export default class CrudNet extends React.Component<ICrudNetProps, {}> {
           </div>
         </div>
         <div className="text-center">
-          <button type="button" className="btn btn-primary me-4">
+          <button
+            type="button"
+            className="btn btn-primary me-4"
+            onClick={() => {
+              console.log("first");
+            }}
+          >
             Agregar
           </button>
-          <button type="button" className="btn btn-success me-4">
+          <button
+            type="button"
+            className="btn btn-success me-4"
+            onClick={() => console.log(this.state)}
+          >
             Mostrar
           </button>
-          <button type="button" className="btn btn-warning me-4">
+          <button
+            type="button"
+            className="btn btn-warning me-4"
+            onClick={this._getAllItems}
+          >
             Acualizar
           </button>
-          <button type="button" className="btn btn-danger  me-4">
+          <button
+            type="button"
+            className="btn btn-danger  me-4"
+            onClick={() => console.log("Eliminar")}
+          >
             Eliminar
           </button>
         </div>
         <hr />
-        <div className="container" id="lista" />
+        <div className="container" id="lista">
+          <ul style={{ listStyle: "none" }}>{}</ul>
+        </div>
       </section>
     );
   }
 
-  // private get() {
-  //   console.log(this.props);
-  //   this.props.context.spHttpClient
-  //     .get(this.url, SPHttpClient.configurations.v1, {
-  //       headers: {
-  //         Accept: "application/json;odata=nometadata",
-  //         "odata-version": "",
-  //       },
-  //     })
-  //     .then((response: SPHttpClientResponse) => {
-  //       if (response.ok) {
-  //         response.json().then((responseJSON: any) => {
-  //           let html = `<table>
-  //                           <tr>
-  //                             <th>Id</th>
-  //                             <th>Nombre</th>
-  //                             <th>Correo</th>
-  //                             <th>Telefono</th>
-  //                           </tr>`;
-  //           responseJSON.value.map((item: IItem, index: number) => {
-  //             html += `
-  //                         <tr>
-  //                           <td>${item.id}</td>
-  //                           <td>${item.nombre}</td>
-  //                           <td>${item.correo}</td>
-  //                           <td>${item.telefono}</td>
-  //                         </tr>`;
-  //           });
-  //           html += `</table>`;
-  //           document.getElementById("lista").innerHTML = html;
-  //           console.log(responseJSON);
-  //         });
-  //       }
-  //     })
-  //     .catch((error: any) => {
-  //       throw new Error(error);
-  //     });
-  // }
+  private async _getAllItems(): Promise<void> {
+    try {
+      const result = await this.serviceProvider.getItems();
+      this.setState({ data: result });
+    } catch (error) {
+      throw new Error("La promesa tuvo este error: " + error);
+    }
+
+    // .then((result) => {
+    //   // console.log(result);
+    //   this.setState({ data: result });
+    // })
+    // .catch((error) => console.log(error));
+  }
 }
