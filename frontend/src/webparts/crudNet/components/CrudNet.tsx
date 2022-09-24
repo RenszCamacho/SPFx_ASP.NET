@@ -29,12 +29,17 @@ export default class CrudNet extends React.Component<
     };
   }
 
-  public async componentDidMount(): Promise<void> {
-    this._getAllItems().then(console.log).catch(console.error);
-  }
+  // public async componentDidMount(): Promise<void> {
+  //   try {
+  //     await this._getAllItems();
+  //   } catch (error) {
+  //     throw new Error(error);
+  //   }
+
+  //   // this._getAllItems().then(console.log).catch(console.error);
+  // }
 
   public render(): React.ReactElement<ICrudNetProps> {
-    console.log(this.state);
     return (
       <section
         className={`${styles.crudNet} ${
@@ -81,7 +86,7 @@ export default class CrudNet extends React.Component<
           <button
             type="button"
             className="btn btn-success me-4"
-            onClick={() => console.log(this.state)}
+            onClick={() => this._getAllItems()}
           >
             Mostrar
           </button>
@@ -102,7 +107,22 @@ export default class CrudNet extends React.Component<
         </div>
         <hr />
         <div className="container" id="lista">
-          <ul style={{ listStyle: "none" }}>{}</ul>
+          <table>
+            <tr>
+              <th>Id</th>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Telefono</th>
+            </tr>
+            {this.state.data.map(({ id, nombre, correo, telefono }) => (
+              <tr key={id}>
+                <td>{id}</td>
+                <td>{nombre}</td>
+                <td>{correo}</td>
+                <td>{telefono}</td>
+              </tr>
+            ))}
+          </table>
         </div>
       </section>
     );
@@ -115,11 +135,5 @@ export default class CrudNet extends React.Component<
     } catch (error) {
       throw new Error("La promesa tuvo este error: " + error);
     }
-
-    // .then((result) => {
-    //   // console.log(result);
-    //   this.setState({ data: result });
-    // })
-    // .catch((error) => console.log(error));
   }
 }
