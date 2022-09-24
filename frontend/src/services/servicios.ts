@@ -1,46 +1,35 @@
+import {
+  HttpClient,
+  IHttpClientOptions,
+  HttpClientResponse,
+} from "@microsoft/sp-http";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
-import { HttpClient } from "@microsoft/sp-http";
+import { IItem } from "../interface/IItem";
 
-export default class Servicios {
-  private url = "http://localhost:7253/api";
+export class ServicesProvider {
+  private _wpContext: WebPartContext;
 
-  post(context: WebPartContext) {
-    const _post = context.httpClient
-      .post(this.url, HttpClient.configurations.v1, {
-        method: "POST",
-
-      }).then((response) => {
-
-        if (response.ok) {
-          response.json;
-        }
-
-      }).catch((error) => {
-        throw new Error(error);
-      });
+  public constructor(context: WebPartContext) {
+    this._wpContext = context;
   }
 
-  get(context: WebPartContext) {
-    const _get = context.httpClient
-      .get(this.url, HttpClient.configurations.v1, {
-        
-       headers:{
-        'Accept':'application/json;odata=nometadata',
-        'odata-version':''
-       }
+  private _httpClientOptionsForGlobal: IHttpClientOptions = {
+    headers: new Headers(),
+    method: "GET",
+    // mode: "cors",
+  };
 
-      }).then((response) => {
-
-        if (response.ok) {
-          response.json;
-        } 
-      }).catch((error) => {
-        throw new Error(error);
-      });
+  public async getItems(): Promise<IItem[]> {
+    try {
+      const response: HttpClientResponse = await this._wpContext.httpClient.get(
+        "https://localhost:7253/api/contactos",
+        HttpClient.configurations.v1,
+        this._httpClientOptionsForGlobal
+      );
+      const responseJson: IItem[] = await response.json();
+      return responseJson;
+    } catch (error) {
+      throw new Error("La llamada httPClient tuvo un error" + error);
+    }
   }
-
-
-
-
-
 }
