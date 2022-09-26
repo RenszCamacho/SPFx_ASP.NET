@@ -1,5 +1,5 @@
 export interface IItem {
-  id: number;
+  id?: number;
   nombre: string;
   correo: string;
   telefono: number;
