@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "bootstrap/dist/css/bootstrap.css";
 import * as React from "react";
 import styles from "./CrudNet.module.scss";
@@ -6,9 +5,12 @@ import styles from "./CrudNet.module.scss";
 import { ICrudNetProps } from "./ICrudNetProps";
 import { IItem } from "../../../interface/IItem";
 import { ServicesProvider } from "../../../services/servicios";
+import { postItem } from "../../../services/PostItem";
+// import Form from "./Form";
 
 interface ICrudNetState {
   data: IItem[];
+  item: IItem;
 }
 
 export default class CrudNet extends React.Component<
@@ -24,20 +26,19 @@ export default class CrudNet extends React.Component<
 
     this.serviceProvider = new ServicesProvider(this.props.wpContext);
 
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+
     this.state = {
       data: [],
+      item: {
+        // id: 0,
+        nombre: "",
+        correo: "",
+        telefono: 0,
+      },
     };
   }
-
-  // public async componentDidMount(): Promise<void> {
-  //   try {
-  //     await this._getAllItems();
-  //   } catch (error) {
-  //     throw new Error(error);
-  //   }
-
-  //   // this._getAllItems().then(console.log).catch(console.error);
-  // }
 
   public render(): React.ReactElement<ICrudNetProps> {
     return (
@@ -48,61 +49,54 @@ export default class CrudNet extends React.Component<
       >
         <h1 className={styles.welcome}>Lista de Contactos</h1>
         <div className="container">
-          <div className="id">
-            <input
-              type="number"
-              id="identificador"
-              placeholder="Introduce el Id"
-            />
-          </div>
-          <br />
-          <div className="nombre">
-            <input type="text" id="nombre" placeholder="Introduce el Nombre" />
-          </div>
-          <br />
-          <div className="correo">
-            <input type="email" id="correo" placeholder="Introduce el Correo" />
-          </div>
-          <br />
-          <div className="telefono">
-            <input
-              type="tel"
-              id="telefono"
-              placeholder="Introduce el Telefono"
-            />
-            <hr />
-          </div>
+          <form onSubmit={this.handleSubmit}>
+            <div className="nombre">
+              <input
+                type="text"
+                id="nombre"
+                placeholder="Introduce el Nombre"
+                className="form-control mb-2"
+                name="nombre"
+                onChange={(e) => this.handleChange(e)}
+              />
+            </div>
+            <div className="correo">
+              <input
+                type="email"
+                id="correo"
+                placeholder="Introduce el Correo"
+                className="form-control mb-2"
+                name="correo"
+                onChange={(e) => this.handleChange(e)}
+              />
+            </div>
+            <div className="telefono">
+              <input
+                type="tel"
+                id="telefono"
+                placeholder="Introduce el Telefono"
+                className="form-control mb-2"
+                name="telefono"
+                onChange={(e) => this.handleChange(e)}
+              />
+            </div>
+            <div className="d-grid gap-2">
+              <button type="submit" className="btn btn-primary">
+                Agregar
+              </button>
+            </div>
+          </form>
         </div>
-        <div className="text-center">
+
+        <hr />
+
+        <div className="text-center d-grid gap-2">
           <button
             type="button"
-            className="btn btn-primary me-4"
-            onClick={() => {
-              console.log("first");
-            }}
-          >
-            Agregar
-          </button>
-          <button
-            type="button"
-            className="btn btn-success me-4"
+            className="btn btn-success"
             onClick={() => this._getAllItems()}
           >
             Mostrar
-          </button>
-          <button
-            type="button"
-            className="btn btn-warning me-4"
-            onClick={this._getAllItems}
-          >
-            Acualizar
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger  me-4"
-            onClick={() => console.log("Eliminar")}
-          >
-            Eliminar
           </button>
         </div>
         <hr />
@@ -113,19 +107,62 @@ export default class CrudNet extends React.Component<
               <th>Nombre</th>
               <th>Correo</th>
               <th>Telefono</th>
+              <th>Actualizar</th>
+              <th>Borrar</th>
             </tr>
             {this.state.data.map(({ id, nombre, correo, telefono }) => (
-              <tr key={id}>
-                <td>{id}</td>
-                <td>{nombre}</td>
-                <td>{correo}</td>
-                <td>{telefono}</td>
-              </tr>
+              <>
+                <tr key={id}>
+                  <td>{id}</td>
+                  <td>{nombre}</td>
+                  <td>{correo}</td>
+                  <td>{telefono}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-warning me-4"
+                      onClick={() => console.log("Actualizar" + id)}
+                    >
+                      Acualizar
+                    </button>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="btn btn-danger  me-4"
+                      onClick={() => console.log("Eliminar" + id)}
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              </>
             ))}
           </table>
         </div>
       </section>
     );
+  }
+
+  public handleChange(event: React.ChangeEvent<HTMLInputElement>): void {
+    this.setState({
+      data: [...this.state.data],
+      item: { ...this.state.item, [event.target.name]: event.target.value },
+    });
+  }
+
+  public async handleSubmit(event: React.SyntheticEvent): Promise<void> {
+    event.preventDefault();
+
+    try {
+      console.log(`ESTES ES EL ESTADO: ${this.state.item}`);
+      const result = await postItem(this.state.item, this.props.wpContext);
+      console.log(result);
+      // const result = await this.serviceProvider.postItem(this.state.item);
+      // console.log(`ESTE ES EL RESULTADO: ${result}`);
+    } catch (error) {
+      throw new Error("La promesa tuvo este error: " + error);
+    }
   }
 
   private async _getAllItems(): Promise<void> {
